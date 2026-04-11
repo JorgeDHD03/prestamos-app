@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+prestamos.db
+.env
+.venv/
+venv/
