@@ -28,6 +28,14 @@ async function renderPayments() {
                             <input type="date" id="pf-date" value="${new Date().toISOString().split('T')[0]}">
                         </div>
                     </div>
+                    <div class="form-group" style="margin-bottom: 1rem;">
+                        <label>Tipo de Abono</label>
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem; font-size: 0.9rem;">
+                            <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;"><input type="radio" name="pf-type" value="NORMAL" checked> Cuota Completa</label>
+                            <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;"><input type="radio" name="pf-type" value="CAPITAL_ONLY"> Solo Capital</label>
+                            <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;"><input type="radio" name="pf-type" value="INTEREST_ONLY"> Solo Interés</label>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label>Notas (opcional)</label>
                         <input type="text" id="pf-notes" placeholder="Observaciones del pago">
@@ -73,10 +81,12 @@ async function renderPayments() {
         if (!loanId) { showToast('Selecciona un préstamo', 'error'); return; }
 
         try {
+            const paymentType = document.querySelector('input[name="pf-type"]:checked').value;
             const payment = await API.createPayment({
                 loan_id: loanId,
                 amount: parseFloat(document.getElementById('pf-amount').value),
                 payment_date: document.getElementById('pf-date').value,
+                payment_type: paymentType,
                 notes: document.getElementById('pf-notes').value || null,
             });
             showToast('Pago registrado exitosamente', 'success');
@@ -113,6 +123,14 @@ function showPaymentForm(loanId, balance, rate) {
                     <input type="date" id="qpf-date" value="${today}">
                 </div>
             </div>
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <label>Tipo de Abono</label>
+                <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.5rem; font-size: 0.85rem;">
+                    <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;"><input type="radio" name="qpf-type" value="NORMAL" checked> Normal</label>
+                    <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;"><input type="radio" name="qpf-type" value="CAPITAL_ONLY"> A Capital</label>
+                    <label style="font-weight:normal; display:flex; align-items:center; gap:0.3rem; margin:0;"><input type="radio" name="qpf-type" value="INTEREST_ONLY"> A Interés</label>
+                </div>
+            </div>
             <div class="form-group">
                 <label>Notas</label>
                 <input type="text" id="qpf-notes" placeholder="Observaciones">
@@ -123,10 +141,12 @@ function showPaymentForm(loanId, balance, rate) {
 
     document.getElementById('qpf-submit').addEventListener('click', async () => {
         try {
+            const paymentType = document.querySelector('input[name="qpf-type"]:checked').value;
             const payment = await API.createPayment({
                 loan_id: loanId,
                 amount: parseFloat(document.getElementById('qpf-amount').value),
                 payment_date: document.getElementById('qpf-date').value,
+                payment_type: paymentType,
                 notes: document.getElementById('qpf-notes').value || null,
             });
             showToast('Pago registrado exitosamente', 'success');

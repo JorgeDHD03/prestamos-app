@@ -22,6 +22,13 @@ class PaymentFrequencyEnum(str, Enum):
     MONTHLY = "MONTHLY"
 
 
+class PaymentTypeEnum(str, Enum):
+    NORMAL = "NORMAL"
+    CAPITAL_ONLY = "CAPITAL_ONLY"
+    INTEREST_ONLY = "INTEREST_ONLY"
+
+
+
 # ── Auth ───────────────────────────────────────────
 class LoginRequest(BaseModel):
     username: str
@@ -128,6 +135,7 @@ class PaymentCreate(BaseModel):
     loan_id: int
     amount: float = Field(gt=0)
     payment_date: date
+    payment_type: PaymentTypeEnum = PaymentTypeEnum.NORMAL
     notes: Optional[str] = None
 
 

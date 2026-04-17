@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import Payment, Loan, LoanStatus, User
-from app.schemas import PaymentCreate, PaymentOut, ReceiptOut
+from app.schemas import PaymentCreate, PaymentOut, ReceiptOut, PaymentTypeEnum
 from app.auth import get_current_user
 from app.utils.loan_calculator import calculate_interest_for_balance
 from app.utils.receipt import generate_receipt_number
@@ -29,21 +29,30 @@ def create_payment(
     # Calculate interest on current balance
     interest_due = calculate_interest_for_balance(loan.outstanding_balance, loan.interest_rate)
 
-    # Split payment: first cover interest, then principal
-    if req.amount <= interest_due:
+    # Determine payment distribution based on payment_type
+    if req.payment_type == PaymentTypeEnum.CAPITAL_ONLY:
+        interest_portion = 0.0
+        principal_portion = req.amount
+    elif req.payment_type == PaymentTypeEnum.INTEREST_ONLY:
         interest_portion = req.amount
         principal_portion = 0.0
     else:
-        interest_portion = interest_due
-        principal_portion = round(req.amount - interest_due, 2)
+        # NORMAL: first cover interest, then principal
+        if req.amount <= interest_due:
+            interest_portion = req.amount
+            principal_portion = 0.0
+        else:
+            interest_portion = interest_due
+            principal_portion = round(req.amount - interest_due, 2)
 
-    # Don't let principal portion exceed outstanding balance
+    # Validate that principal payment does not exceed outstanding balance
     if principal_portion > loan.outstanding_balance:
-        principal_portion = loan.outstanding_balance
-        # Refund excess? No, just cap it
-        actual_amount = round(interest_portion + principal_portion, 2)
-    else:
-        actual_amount = req.amount
+        raise HTTPException(
+            status_code=400,
+            detail=f"El abono a capital (${principal_portion}) excede el saldo actual del préstamo (${loan.outstanding_balance}). Ingrese un monto menor o igual al saldo."
+        )
+
+    actual_amount = req.amount
 
     new_balance = round(loan.outstanding_balance - principal_portion, 2)
     new_balance = max(new_balance, 0.0)
