@@ -6,8 +6,6 @@ from pathlib import Path
 from app.database import engine, Base
 from app.routers import auth, clients, loans, payments, dashboard
 
-# Create tables
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Prestamos App", version="1.0.0")
 
@@ -28,7 +26,9 @@ app.include_router(dashboard.router)
 
 # Serve static files
 BASE_DIR = Path(__file__).resolve().parent.parent
-app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
+static_dir = BASE_DIR / "static"
+if static_dir.exists() and static_dir.is_dir():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 
 @app.get("/")
