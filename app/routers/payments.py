@@ -26,8 +26,13 @@ def create_payment(
     if req.amount <= 0:
         raise HTTPException(status_code=400, detail="El monto debe ser mayor a cero")
 
-    # Calculate interest on current balance
-    interest_due = calculate_interest_for_balance(loan.outstanding_balance, loan.interest_rate)
+    # Calculate interest based on interest_type
+    interest_due = calculate_interest_for_balance(
+        balance=loan.outstanding_balance,
+        rate_percent=loan.interest_rate,
+        original_principal=loan.principal,
+        interest_type=loan.interest_type.value if hasattr(loan.interest_type, 'value') else loan.interest_type
+    )
 
     # Determine payment distribution based on payment_type
     if req.payment_type == PaymentTypeEnum.CAPITAL_ONLY:

@@ -110,6 +110,13 @@ async function showNewLoanForm(clientId = null, clientName = '') {
                     <input type="number" id="lf-rate" min="0.01" step="0.01" placeholder="5">
                 </div>
             </div>
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label>Sistema de Amortización</label>
+                <select id="lf-type">
+                    <option value="FIXED">Francés (Sobre Saldo Actual)</option>
+                    <option value="FLAT">Tasa Plana (Fijo sobre Capital Total)</option>
+                </select>
+            </div>
             <div class="form-row">
                 <div class="form-group">
                     <label>Frecuencia de Cobro</label>
@@ -144,7 +151,7 @@ async function showNewLoanForm(clientId = null, clientName = '') {
                 client_id: parseInt(document.getElementById('lf-client').value),
                 principal: parseFloat(document.getElementById('lf-principal').value),
                 interest_rate: parseFloat(document.getElementById('lf-rate').value),
-                interest_type: 'FIXED',
+                interest_type: document.getElementById('lf-type').value,
                 payment_frequency: document.getElementById('lf-frequency').value,
                 total_periods: parseInt(document.getElementById('lf-periods').value),
                 penalty_rate: parseFloat(document.getElementById('lf-penalty').value),
@@ -188,8 +195,8 @@ async function viewLoan(id) {
                     <p style="font-weight:600;color:var(--warning);" class="money">${formatMoney(loan.outstanding_balance)}</p>
                 </div>
                 <div>
-                    <span style="color:var(--text-muted);font-size:0.8rem;">Tasa</span>
-                    <p>${loan.interest_rate}% ${freqMap[loan.payment_frequency] || ''}</p>
+                    <span style="color:var(--text-muted);font-size:0.8rem;">Tasa y Sistema</span>
+                    <p>${loan.interest_rate}% / ${loan.interest_type === 'FLAT' ? 'Plana' : 'Francés'}</p>
                 </div>
                 <div>
                     <span style="color:var(--text-muted);font-size:0.8rem;">Total a Pagar</span>
@@ -292,6 +299,13 @@ async function renderSimulator() {
                             <input type="number" id="sim-rate" min="0.01" step="0.01" value="5" placeholder="Tasa por periodo">
                         </div>
                         <div class="form-group">
+                            <label>Sistema de Amortización</label>
+                            <select id="sim-type">
+                                <option value="FIXED">Francés (Sobre Saldo Actual)</option>
+                                <option value="FLAT">Tasa Plana (Fijo sobre Capital Total)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>Frecuencia de Cobro</label>
                             <select id="sim-frequency">
                                 <option value="MONTHLY">Mensual</option>
@@ -322,7 +336,7 @@ async function runSimulation() {
     const data = {
         principal: parseFloat(document.getElementById('sim-principal').value),
         interest_rate: parseFloat(document.getElementById('sim-rate').value),
-        interest_type: 'FIXED',
+        interest_type: document.getElementById('sim-type').value,
         payment_frequency: document.getElementById('sim-frequency').value,
         total_periods: parseInt(document.getElementById('sim-periods').value),
     };

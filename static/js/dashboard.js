@@ -27,6 +27,23 @@ async function renderDashboard() {
                     <div class="chart-container"><canvas id="distribution-chart"></canvas></div>
                 </div>
             </div>
+            <div class="card" style="margin-top:2rem;">
+                <div class="card-header"><span class="card-title">Desglose Mensual Analítico</span></div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mes</th>
+                                <th>Capital Cobrado</th>
+                                <th>Intereses y Otros</th>
+                                <th>Total Recaudado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monthly-breakdown-body">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     `;
 
@@ -156,4 +173,17 @@ function renderCharts(stats) {
             },
         },
     });
+
+    // Render Explicit Table
+    document.getElementById('monthly-breakdown-body').innerHTML = stats.monthly_summaries.map(s => {
+        if (s.total_collected === 0) return '';
+        return `
+            <tr>
+                <td style="font-weight:600;">${s.month}</td>
+                <td class="money">${formatMoney(s.capital_collected)}</td>
+                <td class="money" style="color:var(--primary-light);">${formatMoney(s.interest_collected + (s.penalty_collected||0))}</td>
+                <td class="money" style="font-weight:700;color:var(--success);">${formatMoney(s.total_collected)}</td>
+            </tr>
+        `;
+    }).join('') || '<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted);">No hay cobros en este año.</td></tr>';
 }

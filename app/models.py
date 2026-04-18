@@ -12,7 +12,8 @@ class LoanStatus(str, enum.Enum):
 
 
 class InterestType(str, enum.Enum):
-    FIXED = "FIXED"
+    FIXED = "FIXED"       # Amortización Francesa
+    FLAT = "FLAT"         # Tasa Plana Global
     VARIABLE = "VARIABLE"
 
 
